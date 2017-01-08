@@ -1,0 +1,25 @@
+{
+  "name": "v8-log-processor",
+  "version": "1.0.0",
+  "description": "Desktop application for analyzing node & v8 profile logs",
+  "author": "Chandler Prall <chandler.prall@gmail.com>",
+  "license": "MIT",
+  "main": "build/electron-main",
+  "scripts": {
+    "build": "./node_modules/.bin/webpack --progress",
+    "watch": "./node_modules/.bin/webpack --progress --watch",
+    "electron": "./node_modules/.bin/electron ."
+  },
+  "devDependencies": {
+    "babel-loader": "^6.2.10",
+    "babel-plugin-jsx-display-if": "^3.0.0",
+    "babel-preset-react": "^6.16.0",
+    "glob": "^7.1.1",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "webpack": "^2.2.0-rc.3"
+  },
+  "dependencies": {
+    "electron": "^1.4.13"
+  }
+}
