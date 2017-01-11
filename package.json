@@ -12,14 +12,24 @@
   },
   "devDependencies": {
     "babel-loader": "^6.2.10",
+    "babel-plugin-encapsulate-jsx": "^2.0.0",
     "babel-plugin-jsx-display-if": "^3.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.20.2",
     "babel-preset-react": "^6.16.0",
+    "css-encapsulation-loader": "^1.0.0",
+    "css-loader": "^0.26.1",
     "glob": "^7.1.1",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
+    "style-loader": "^0.13.1",
     "webpack": "^2.2.0-rc.3"
   },
   "dependencies": {
-    "electron": "^1.4.13"
+    "classnames": "^2.2.5",
+    "csv-parse": "^1.1.9",
+    "electron": "^1.4.13",
+    "immutable": "^3.8.1",
+    "insula": "^1.0.1",
+    "react-insula": "^1.0.0"
   }
 }

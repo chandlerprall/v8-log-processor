@@ -1,0 +1,15 @@
+.dropzone {
+    position: relative;
+    border: 3px dashed #546d5a;
+    height: 200px;
+}
+.dropzone.isDragging {
+    border-color: #269c2f;
+}
+
+.dropzone p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

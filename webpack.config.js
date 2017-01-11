@@ -2,7 +2,7 @@ const glob = require('glob');
 const path = require('path');
 
 const moduleAliases = glob.sync(
-	'**/*.js',
+	'**/*.@(js|css)',
 	{realpath: true, cwd: path.join(__dirname, 'src')}
 ).reduce(
 	(moduleAliases, filepath) => {
@@ -49,12 +49,21 @@ module.exports = [
 				{
 					test: /\.js$/,
 					exclude: /node_modules/,
+					loader: path.join(__dirname, 'scripts', 'jsx-style-imports-loader')
+				},
+				{
+					test: /\.js$/,
+					exclude: /node_modules\/[^(insula)]\/]/,
 					loader: 'babel-loader',
 					query: {
 						babelrc: false,
 						presets: ['react'],
-						plugins: ['jsx-display-if']
+						plugins: ['jsx-display-if', 'encapsulate-jsx', 'transform-object-rest-spread']
 					}
+				},
+				{
+					test: /\.css$/,
+					loaders: ['style-loader', 'css-loader', 'css-encapsulation-loader']
 				}
 			]
 		}
