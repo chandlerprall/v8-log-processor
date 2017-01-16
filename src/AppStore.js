@@ -3,6 +3,7 @@ import Store from 'insula/src/Store';
 import Section from 'insula/src/Section';
 import {LogImportDragOverIntent, LogImportDragLeaveIntent, LogImportDropIntent} from 'LogImportIntents';
 import {ProcessLogIntent, InitializeLogDetailsIntent, ProcessLogLineIntent, FinishProcessingLogIntent} from 'ProcessLogIntents';
+import {SelectLogViewIntent} from 'LogViewIntents';
 
 class ImmutableStore extends Store {
 	constructor(...args) {
@@ -53,6 +54,7 @@ class ImmutableStore extends Store {
 export default new ImmutableStore({
 	sections: {
 		logImport: Section(Immutable.fromJS({isDragging: false}), LogImportDragOverIntent, LogImportDragLeaveIntent, LogImportDropIntent),
-		logDetails: Section(Immutable.fromJS({}), ProcessLogIntent, InitializeLogDetailsIntent, ProcessLogLineIntent, FinishProcessingLogIntent)
+		logDetails: Section(Immutable.fromJS({}), ProcessLogIntent, InitializeLogDetailsIntent, ProcessLogLineIntent, FinishProcessingLogIntent),
+		logView: Section(Immutable.fromJS({}), SelectLogViewIntent)
 	}
 });

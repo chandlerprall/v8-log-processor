@@ -2,14 +2,15 @@ import Immutable from 'immutable';
 import Intent from 'insula/src/Intent';
 import parseCsv from 'csv-parse';
 import {processLogLine} from 'LogLineProcessor';
+import createTree from 'RBTree';
 
-export const InitializeLogDetailsIntent = Intent('InitializeLogDetailsIntent', () => Immutable.fromJS({
+export const InitializeLogDetailsIntent = Intent('InitializeLogDetailsIntent', () => new Immutable.Map({
 	isLoading: true,
-	processedLines: 0,
-	results: {
-		functionsByStartAddr: {},
+	results: new Immutable.Map({
+		// functionsByStartAddr: {},
+		functionsByStartAddr: createTree(),
 		functionsByFuncAddr: {}
-	}
+	})
 }));
 
 export const FinishProcessingLogIntent = Intent('FinishProcessingLogIntent', logDetails => logDetails.set('isLoading', false));
@@ -25,11 +26,14 @@ export const ProcessLogIntent = Intent('ProcessLogIntent', (logDetails, logConte
 	dispatch('InitializeLogDetailsIntent');
 
 	const parser = parseCsv({
-		quote: '""', // pretend nothing is quoted
+		// quote: '""', // pretend nothing is quoted
+		relax: true,
 		relax_column_count: true // column count depends on what type of signal the line is
 	});
 	parser.on('data', lineDetails => dispatch('ProcessLogLineIntent', lineDetails));
 	parser.on('finish', () => dispatch('FinishProcessingLogIntent'));
+
+	window.logDetails = logDetails;
 
 	setTimeout(() => parser.end(logContents));
 });

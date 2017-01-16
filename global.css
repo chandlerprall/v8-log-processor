@@ -2,4 +2,6 @@ body {
     margin: 10px 20px;
     background-color: #e6e6e6;
     font: 16px Helvetica;
+    -webkit-user-select: none;
+    cursor: default;
 }

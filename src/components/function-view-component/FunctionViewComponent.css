@@ -1,0 +1,22 @@
+.wrapper {
+    font-size: 0.8rem;
+    line-height: 1.2rem;
+}
+
+.funcDetails:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.functionName {
+    cursor: default;
+}
+
+.expandoWrapper {
+    display: inline-block;
+    width: 20px;
+}
+.expando {
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+}

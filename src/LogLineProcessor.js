@@ -75,11 +75,7 @@ function CallPath(parent, child) {
 }
 
 function findFunctionByAddress(logState, address) {
-	return logState.get('functionsByStartAddr').find((func, funcStart) => {
-		if (address >= funcStart && address <= funcStart + func.size) {
-			return func;
-		}
-	});
+	return logState.get('functionsByStartAddr').getWithin(address);
 }
 
 const lineProcessors = {
@@ -89,7 +85,11 @@ const lineProcessors = {
 		endAddr = parseInt(endAddr);
 
 		const codeFunction = new CodeFunction('shared', name, startAddr, endAddr - startAddr, CodeState.STATIC_COMPILED);
-		return logState.setIn(['functionsByStartAddr', startAddr], codeFunction);
+		logState = logState.update('functionsByStartAddr', functionsByStartAddr => {
+			return functionsByStartAddr.insert(codeFunction.startAddr, codeFunction.size, codeFunction);
+		});
+
+		return logState;
 	},
 
 	// JIT-code
@@ -97,20 +97,25 @@ const lineProcessors = {
 		kind = parseInt(kind);
 		start = parseInt(start);
 		size = parseInt(size);
+		name = name.trim();
 
 		let codeFunction;
 		if (funcAddr != null && state != null) {
 			funcAddr = parseInt(funcAddr);
 			state = CodeStateLookup[state];
 
-			codeFunction = new CodeFunction(type, name, funcAddr, size, state, funcAddr);
+			codeFunction = new CodeFunction(type, name, start, size, state, funcAddr);
 		} else {
-			codeFunction = new CodeFunction(type, name, -1, size, CodeState.COMPILED);
+			codeFunction = new CodeFunction(type, name, start, size, CodeState.COMPILED);
 		}
 
-		logState = logState.setIn(['functionsByStartAddr', start], codeFunction);
+		logState = logState.update('functionsByStartAddr', functionsByStartAddr => {
+			return functionsByStartAddr.insert(codeFunction.startAddr, codeFunction.size, codeFunction);
+		});
 		if (funcAddr) {
-			logState = logState.setIn(['functionsByFuncAddr', funcAddr], codeFunction);
+			// logState = logState.setIn(['functionsByFuncAddr', funcAddr], codeFunction);
+			logState.get('functionsByFuncAddr')[funcAddr] = logState.get('functionsByFuncAddr')[funcAddr] || [];
+			logState.get('functionsByFuncAddr')[funcAddr].push(codeFunction);
 		}
 
 		return logState;
@@ -130,7 +135,8 @@ const lineProcessors = {
 					console.error(`Was told to move non-existant code from ${from} to ${to}`);
 				}
 
-				return functionsByStartAddr.delete(from).set(to, func);
+				func.startAddr = to;
+				return functionsByStartAddr.remove(from).insert(to, func.size, func);
 			}
 		);
 	},
@@ -148,7 +154,7 @@ const lineProcessors = {
 					console.error(`Was told to delete non-existant code from ${from}`);
 				}
 
-				return functionsByStartAddr.delete(from);
+				return functionsByStartAddr.remove(from);
 			}
 		);
 	},
@@ -167,7 +173,8 @@ const lineProcessors = {
 					console.error(`Was told to move non-existant code from ${from} to ${to}`);
 				}
 
-				return functionsByStartAddr.delete(from).set(to, func);
+				func.startAddr = to;
+				return functionsByStartAddr.remove(from).insert(to, func.size, func);
 			}
 		);
 	},
@@ -222,6 +229,7 @@ const lineProcessors = {
 export function processLogLine(logState, [command, ...values]) {
 	if (lineProcessors.hasOwnProperty(command)) {
 		logState = lineProcessors[command](logState, values);
+		if (logState == null) debugger;
 	} else {
 		// console.log(values); // squawk about a line we didn't understand
 	}
