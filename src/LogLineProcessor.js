@@ -85,7 +85,7 @@ export function getCallPathIdFromFunctionStack(functionStack) {
 }
 
 function addCallPathExecution(logState, functionStack) {
-	if (functionStack.length < 2) return; // we don't care if there isn't any parent/child relationship
+	if (functionStack.length === 0) return;
 	const callPathId = getCallPathIdFromFunctionStack(functionStack);
 	let callPathExecutions = logState.get('callPathExecutions');
 	callPathExecutions[callPathId] = callPathExecutions[callPathId] || 0;
@@ -93,7 +93,7 @@ function addCallPathExecution(logState, functionStack) {
 }
 
 function addCallPathTraversal(logState, functionStack) {
-	if (functionStack.length < 1) return; // if there's nothing there don't care
+	if (functionStack.length === 0) return;
 	let callPathTraversals = logState.get('callPathTraversals');
 	let partialStack = [];
 	for (let i = 0; i < functionStack.length; i++) {

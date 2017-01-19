@@ -3,6 +3,7 @@ import connect from 'react-insula/src/connect';
 import Transformer from 'insula/src/Transformer';
 import RadioButtonComponent from 'RadioButtonComponent';
 import TopDownComponent from 'TopDownComponent';
+import BottomUpComponent from 'BottomUpComponent';
 
 const VIEW_TOP_DOWN = 'logView/VIEW_TOP_DOWN';
 const VIEW_BOTTOM_UP = 'logView/VIEW_BOTTOM_UP';
@@ -22,6 +23,7 @@ function LogViewComponent({hasLogFile, details, selectedView, dispatch}) {
 				</div>
 
 				<TopDownComponent display-if={selectedView === VIEW_TOP_DOWN}/>
+				<BottomUpComponent display-if={selectedView === VIEW_BOTTOM_UP}/>
 			</div>
 		</div>
 	)

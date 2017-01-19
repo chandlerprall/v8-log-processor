@@ -50,6 +50,7 @@ class FunctionViewComponent extends PureComponent {
 		const expandable = subPaths.length > 0;
 		const callPathId = getCallPathIdFromFunctionStack(stack);
 		const callPathExecutionCount = callPathExecutions[callPathId] || 0;
+		// const callPathExecutionCount = func.executions;
 		const traversals = callPathTraversals[callPathId] || 0;
 
 		return (
@@ -74,7 +75,7 @@ class FunctionViewComponent extends PureComponent {
 					<div display-if={isOpen} className="col-xs-12">
 						{subPaths.map(path => {
 							const subFunc = path[subFuncAccessor];
-							return <ConnectedFunctionViewComponent key={subFunc.startAddr}
+							return <ConnectedFunctionViewComponent key={subFunc.id}
 												   func={subFunc}
 												   stack={[...stack, subFunc]}
 												   direction={direction} indent={indent + 1}/>

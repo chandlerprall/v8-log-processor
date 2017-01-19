@@ -1,9 +1,9 @@
 import React, {PropTypes} from 'react';
 import connect from 'react-insula/src/connect';
 import Transformer from 'insula/src/Transformer';
-import FunctionViewComponent, {VIEW_CALLS_DOWN} from 'FunctionViewComponent';
+import FunctionViewComponent, {VIEW_CALLS_UP} from 'FunctionViewComponent';
 
-function TopDownComponent({entryPoints}) {
+function BottomUpComponent({entryPoints}) {
 	return (
 		<div>
 			<div className="row">
@@ -12,15 +12,15 @@ function TopDownComponent({entryPoints}) {
 				<div className="col-xs-2">self</div>
 			</div>
 			{entryPoints.map(entryPoint => (
-				<FunctionViewComponent key={entryPoint.id} stack={[entryPoint]} func={entryPoint} direction={VIEW_CALLS_DOWN}/>
+				<FunctionViewComponent key={entryPoint.startAddr} stack={[entryPoint]} func={entryPoint} direction={VIEW_CALLS_UP}/>
 			))}
 		</div>
 	);
 }
 
-TopDownComponent.displayName = 'TopDownComponent';
+BottomUpComponent.displayName = 'BottomUpComponent';
 
-TopDownComponent.propTypes = {
+BottomUpComponent.propTypes = {
 	entryPoints: PropTypes.array.isRequired
 };
 
@@ -28,10 +28,17 @@ function getEntryPoints(functionsByStartAddr) {
 	let entryPoints = [];
 	let allFunctions = functionsByStartAddr.values;
 	for (let i = 0; i < allFunctions.length; i++) {
-		if (allFunctions[i].parentPaths.length === 0 && (allFunctions[i].childPaths.length > 0 || allFunctions[i].executions > 0)) {
+		if (allFunctions[i].executions > 0 && allFunctions[i].parentPaths.length > 0) {
 			entryPoints.push(allFunctions[i]);
 		}
 	}
+
+	entryPoints.sort((a, b) => {
+		if (a.executions < b.executions) return 1;
+		if (a.executions > b.executions) return -1;
+		return 0;
+	});
+
 	return entryPoints;
 }
 
@@ -42,4 +49,4 @@ export default connect(Transformer(
 			entryPoints: getEntryPoints(results.get('functionsByStartAddr'))
 		};
 	}
-))(TopDownComponent);
+))(BottomUpComponent);
