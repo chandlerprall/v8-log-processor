@@ -7,8 +7,28 @@
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-.functionName {
+.functionInfo {
     cursor: default;
+}
+.functionInfo.type-shared, .functionInfo.type-stub, .functionInfo.type-builtin {
+    color: #555;
+}
+
+.functionState {
+    font-weight: bold;
+    display: none;
+}
+.functionState.optimizable {
+    color: #d44;
+    display: inline;
+}
+.functionState.optimized {
+    color: blue;
+    display: inline;
+}
+
+.functionType {
+    font-style: italic;
 }
 
 .expandoWrapper {

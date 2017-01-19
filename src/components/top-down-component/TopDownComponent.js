@@ -7,12 +7,12 @@ function TopDownComponent({entryPoints}) {
 	return (
 		<div>
 			<div className="row">
-				<div className="col-xs-10">code</div>
-				<div className="col-xs-1">calls</div>
-				<div className="col-xs-1">self</div>
+				<div className="col-xs-8">code</div>
+				<div className="col-xs-2">total calls</div>
+				<div className="col-xs-2">self</div>
 			</div>
 			{entryPoints.map(entryPoint => (
-				<FunctionViewComponent key={entryPoint.startAddr} func={entryPoint} direction={VIEW_CALLS_DOWN}/>
+				<FunctionViewComponent key={entryPoint.startAddr} stack={[entryPoint]} func={entryPoint} direction={VIEW_CALLS_DOWN}/>
 			))}
 		</div>
 	);

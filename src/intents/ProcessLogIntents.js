@@ -7,8 +7,10 @@ import createTree from 'RBTree';
 export const InitializeLogDetailsIntent = Intent('InitializeLogDetailsIntent', () => new Immutable.Map({
 	isLoading: true,
 	results: new Immutable.Map({
-		// functionsByStartAddr: {},
+		totalTicks: 0,
 		functionsByStartAddr: createTree(),
+		callPathExecutions: {},
+		callPathTraversals: {},
 		functionsByFuncAddr: {}
 	})
 }));

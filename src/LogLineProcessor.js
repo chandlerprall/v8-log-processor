@@ -1,25 +1,25 @@
 const noop = x => x;
 
-const CodeState = {
+export const CodeState = {
 	COMPILED: 0,
 	OPTIMIZABLE: 1,
 	OPTIMIZED: 2,
 	STATIC_COMPILED: 3
 };
-const CodeStateLookup = {
+export const CodeStateLookup = {
 	'': CodeState.COMPILED,
 	'~': CodeState.OPTIMIZABLE,
 	'*': CodeState.OPTIMIZED,
 	'cpp': CodeState.STATIC_COMPILED
 };
-const CodeStateLookupReverse = {
+export const CodeStateLookupReverse = {
 	[CodeState.COMPILED]: '',
 	[CodeState.OPTIMIZABLE]: '~',
 	[CodeState.OPTIMIZED]: '*',
 	[CodeState.STATIC_COMPILED]: 'cpp'
 };
 
-const VmStatesLookup = {
+export const VmStatesLookup = {
 	0: 'JS',
 	1: 'GC',
 	2: 'COMPILER',
@@ -27,7 +27,7 @@ const VmStatesLookup = {
 	4: 'EXTERNAL',
 	5: 'IDLE'
 };
-const VmStatesLookupReverse = {
+export const VmStatesLookupReverse = {
 	[VmStatesLookup.JS]: 0,
 	[VmStatesLookup.GC]: 1,
 	[VmStatesLookup.COMPILER]: 2,
@@ -36,7 +36,9 @@ const VmStatesLookupReverse = {
 	[VmStatesLookup.IDLE]: 5,
 };
 
+let codeFunctionCount = 0;
 function CodeFunction(type, name, addr, size, state, funcAddr) {
+	this.id = codeFunctionCount++;
 	this.type = type;
 	this.name = name;
 	this.startAddr = addr;
@@ -78,6 +80,30 @@ function findFunctionByAddress(logState, address) {
 	return logState.get('functionsByStartAddr').getWithin(address);
 }
 
+export function getCallPathIdFromFunctionStack(functionStack) {
+	return functionStack.map(func => func.id).join(':');
+}
+
+function addCallPathExecution(logState, functionStack) {
+	if (functionStack.length < 2) return; // we don't care if there isn't any parent/child relationship
+	const callPathId = getCallPathIdFromFunctionStack(functionStack);
+	let callPathExecutions = logState.get('callPathExecutions');
+	callPathExecutions[callPathId] = callPathExecutions[callPathId] || 0;
+	callPathExecutions[callPathId]++;
+}
+
+function addCallPathTraversal(logState, functionStack) {
+	if (functionStack.length < 1) return; // if there's nothing there don't care
+	let callPathTraversals = logState.get('callPathTraversals');
+	let partialStack = [];
+	for (let i = 0; i < functionStack.length; i++) {
+		partialStack.push(functionStack[i]);
+		const callPathId = getCallPathIdFromFunctionStack(partialStack);
+		callPathTraversals[callPathId] = callPathTraversals[callPathId] || 0;
+		callPathTraversals[callPathId]++;
+	}
+}
+
 const lineProcessors = {
 	// cpp entries
 	'shared-library': (logState, [name, startAddr, endAddr]) => {
@@ -113,7 +139,6 @@ const lineProcessors = {
 			return functionsByStartAddr.insert(codeFunction.startAddr, codeFunction.size, codeFunction);
 		});
 		if (funcAddr) {
-			// logState = logState.setIn(['functionsByFuncAddr', funcAddr], codeFunction);
 			logState.get('functionsByFuncAddr')[funcAddr] = logState.get('functionsByFuncAddr')[funcAddr] || [];
 			logState.get('functionsByFuncAddr')[funcAddr].push(codeFunction);
 		}
@@ -159,22 +184,23 @@ const lineProcessors = {
 		);
 	},
 
-	// a dynamic function was moved
+	// a function was moved
 	'sfi-move': (logState, [from, to]) => {
 		from = parseInt(from);
 		to = parseInt(to);
 
 		return logState.update(
-			'functionsByStartAddr',
-			functionsByStartAddr => {
-				const func = functionsByStartAddr.get(from);
+			'functionsByFuncAddr',
+			functionsByFuncAddr => {
+				const func = functionsByFuncAddr[from];
 
 				if (func == null) {
 					console.error(`Was told to move non-existant code from ${from} to ${to}`);
 				}
 
-				func.startAddr = to;
-				return functionsByStartAddr.remove(from).insert(to, func.size, func);
+				func.funcAddr = to;
+				delete functionsByFuncAddr[from];
+				functionsByFuncAddr[to] = func;
 			}
 		);
 	},
@@ -193,24 +219,30 @@ const lineProcessors = {
 			tos_or_external_callback = 0;
 		}
 
-		stack = [programCounter, ...stack];
+		if (tos_or_external_callback) {
+			stack = [programCounter, tos_or_external_callback, ...stack];
+		} else {
+			stack = [programCounter, ...stack];
+		}
 
-		stack = stack.map(frame => findFunctionByAddress(logState, frame));
+		stack = stack
+			.map(frame => findFunctionByAddress(logState, frame))
+			.filter(func => !!func);
 		if (stack[0] != null) {
 			stack[0].executions++;
 		}
+
+		const inOrderStack = [...stack].reverse();
+		addCallPathExecution(logState, inOrderStack);
+		addCallPathTraversal(logState, inOrderStack);
 		for (let i = 0; i < stack.length - 1; i++) {
 			const current = stack[i];
 			const caller = stack[i+1];
 
-			if (current == null || caller == null) {
-				continue;
-			}
-
 			caller.addCallPath(current);
 		}
 
-		return logState;
+		return logState.update('totalTicks', totalTicks => totalTicks + 1);
 	},
 
 	'snapshot-pos': noop, // snapshot log (addr, pos)
