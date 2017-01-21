@@ -192,15 +192,19 @@ const lineProcessors = {
 		return logState.update(
 			'functionsByFuncAddr',
 			functionsByFuncAddr => {
-				const func = functionsByFuncAddr[from];
+				const funcs = functionsByFuncAddr[from];
 
-				if (func == null) {
-					console.error(`Was told to move non-existant code from ${from} to ${to}`);
+				if (funcs == null) {
+					return functionsByFuncAddr;
 				}
 
-				func.funcAddr = to;
+				for (let i = 0; i < funcs.length; i++) {
+					funcs[i].funcAddr = to;
+				}
+				
 				delete functionsByFuncAddr[from];
-				functionsByFuncAddr[to] = func;
+				functionsByFuncAddr[to] = funcs;
+				return functionsByFuncAddr;
 			}
 		);
 	},

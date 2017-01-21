@@ -5,6 +5,7 @@ let gui;
 function createWindow () {
 	gui = new BrowserWindow({width: 800, height: 600});
 	gui.loadURL(`file://${__dirname}/../index.html`);
+	gui.webContents.openDevTools();
 
 	gui.on('closed', () => {
 		gui = null;
