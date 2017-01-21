@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react';
 import connect from 'react-insula/src/connect';
 import Transformer from 'insula/src/Transformer';
-import FunctionViewComponent, {VIEW_CALLS_UP} from 'FunctionViewComponent';
+import BottomupFunctionComponent from 'BottomupFunctionComponent';
 
 function BottomUpComponent({entryPoints}) {
 	return (
@@ -12,7 +12,7 @@ function BottomUpComponent({entryPoints}) {
 				<div className="col-xs-2">self</div>
 			</div>
 			{entryPoints.map(entryPoint => (
-				<FunctionViewComponent key={entryPoint.startAddr} stack={[entryPoint]} func={entryPoint} direction={VIEW_CALLS_UP}/>
+				<BottomupFunctionComponent key={entryPoint.startAddr} stack={[entryPoint]} func={entryPoint}/>
 			))}
 		</div>
 	);

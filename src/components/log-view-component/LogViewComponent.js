@@ -46,7 +46,7 @@ export default connect(Transformer(
 		return {
 			hasLogFile: !logDetails.isEmpty(),
 			details: logDetails ? logDetails.toJS() : {},
-			selectedView: logView.get('selectedView', VIEW_TOP_DOWN)
+			selectedView: logView.get('selectedView', VIEW_BOTTOM_UP)
 		}
 	}
 ))(LogViewComponent);
